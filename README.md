@@ -3,13 +3,13 @@
 I learn a new tech stack (golang). After some familiarity with the language, it's necessary to understand how to make a typical project:
 - project structure and wiring
 - how to deal with (libraries and practices):
--- http/grpc
--- relational DBs
--- kafka
--- logging (contextual logging would be nice)
--- metrics
--- tracing
--- testing
+  - http/grpc
+  - relational DBs and migrations
+  - kafka
+  - logging (contextual logging would be nice)
+  - metrics
+  - tracing
+  - testing
 - prepare an application for deployment (here it's just locally)
 
 p.s. I use libraries that I've heard about or that have more recommendations on a random Reddit post from unknown people. For example, https://awesome-go.com has so many HTTP libraries that it's impossible to go through all of them.
