@@ -67,6 +67,7 @@ Why postgres and kafka? They are very popular and I have experience with both of
 - Is it possible to use other logging libraries? For example, zap.
 - How to log responses? Do I need to write my own middleware?
 - How to mask headers? For example session token
+- Quite odd decision to use mutable Router and inject it in different APIs, instead of combining Routers constructed in different APIs. Wiring looks clumsy.
 
 ## Logging
 - How to mask fields of structures?
@@ -75,3 +76,4 @@ Why postgres and kafka? They are very popular and I have experience with both of
 
 ## Testing
 - How to write test description as a normal long sentence instead of a camel case function name?
+- how to separate test files from main code

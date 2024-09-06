@@ -1,4 +1,4 @@
-package httpapi
+package internal
 
 import (
 	"time"
@@ -8,9 +8,15 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog/v2"
 	"github.com/optician/meeting-room-booking/internal/administration/httpapi"
+	"github.com/optician/meeting-room-booking/internal/administration/service"
+	"go.uber.org/zap"
 )
 
 func Make(logger *httplog.Logger) chi.Router {
+	zapLogger := zap.NewExample().Sugar()
+
+	adminLogic := service.Make(zapLogger)
+
 	r := chi.NewRouter()
 
 	corsOptions := cors.Options{
@@ -33,7 +39,7 @@ func Make(logger *httplog.Logger) chi.Router {
 		middleware.Recoverer,
 	)
 
-	r.Group(httpapi.Make)
+	r.Group(httpapi.Make(&adminLogic, zapLogger))
 
 	return r
 }

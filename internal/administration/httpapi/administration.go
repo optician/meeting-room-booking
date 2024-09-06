@@ -6,22 +6,24 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/optician/meeting-room-booking/internal/administration/models"
+	"github.com/optician/meeting-room-booking/internal/administration/service"
 	"go.uber.org/zap"
 )
 
 type Controller struct {
 	logger *zap.SugaredLogger
+	logic *service.Logic
 }
 
 // mutates router
-func Make(r chi.Router) {
-	logger := zap.NewExample().Sugar()
+func Make(logic *service.Logic, logger *zap.SugaredLogger) func (chi.Router) {
 	defer logger.Sync()
 
 	controller := Controller{
 		logger: logger,
+		logic: logic,
 	}
-	controller.routes(r)
+	return controller.routes
 }
 
 func (ctrl Controller) routes(r chi.Router) {
@@ -36,7 +38,7 @@ func (ctrl Controller) routes(r chi.Router) {
 func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logicChannel := make(chan []models.RoomInfo)
-	go getRooms(&logicChannel)
+	go ctrl.getRooms(&logicChannel)
 
 	select {
 	case <-ctx.Done():
@@ -53,8 +55,12 @@ func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func getRooms(listener *chan []models.RoomInfo) {
-	*listener <- []models.RoomInfo{{Id: "123", Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
+func (ctrl Controller) getRooms(listener *chan []models.RoomInfo) {
+	if list, err := (*ctrl.logic).List(); err != nil {
+		ctrl.logger.Errorf("internal error: %v", err)
+	} else {
+		*listener <- list
+	}
 }
 
 func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Request) {
@@ -84,8 +90,7 @@ func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Reque
 }
 
 func (ctrl Controller) createRoom(newRoom *models.NewRoomInfo) error {
-	ctrl.logger.Infof("recieved a new room %v", *newRoom)
-	return nil
+	return (*ctrl.logic).Create(newRoom)
 }
 
 func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +99,7 @@ func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Reque
 	if id == "" {
 		ctrl.logger.Error("deletion of a room called without id")
 		w.WriteHeader(http.StatusBadRequest)
-	} else if err := deleteRoom(id); err != nil {
+	} else if err := ctrl.deleteRoom(id); err != nil {
 		ctrl.logger.Errorf("Deletion of %v room raised error: %v", id, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
@@ -102,8 +107,8 @@ func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func deleteRoom(_ string) error {
-	return nil
+func (ctrl Controller) deleteRoom(id string) error {
+	return (*ctrl.logic).Delete(id)
 }
 
 func (ctrl Controller) updateRoomController(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +116,7 @@ func (ctrl Controller) updateRoomController(w http.ResponseWriter, r *http.Reque
 		ctrl.logger.Errorf("Bad Request. Invalid RoomInfo: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
-	} else if err := updateRoom(&room); err != nil {
+	} else if err := ctrl.updateRoom(&room); err != nil {
 		ctrl.logger.Errorf("Update of %v room raised error: %v", room, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
@@ -119,6 +124,6 @@ func (ctrl Controller) updateRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func updateRoom(_ *models.RoomInfo) error {
-	return nil
+func (ctrl Controller) updateRoom(room *models.RoomInfo) error {
+	return (*ctrl.logic).Update(room)
 }

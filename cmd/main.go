@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/httplog/v2"
-	"github.com/optician/meeting-room-booking/internal/httpapi"
+	"github.com/optician/meeting-room-booking/internal"
 )
 
 func main() {
@@ -28,6 +28,6 @@ func main() {
 		QuietDownPeriod: 10 * time.Second,
 		// SourceFieldName: "source",
 	})
-	router := httpapi.Make(logger)
+	router := internal.Make(logger)
 	http.ListenAndServe(":3000", router)
 }
