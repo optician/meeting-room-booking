@@ -55,3 +55,23 @@ p.s. Users here are a mix of humans and other softwares. It's for simplicity bec
 - Booking info contains a meeting host, a meeting room, start, end, date of booking, attendees, agenda.
 
 Why postgres and kafka? They are very popular and I have experience with both of them. 
+
+# Questions for the Future
+
+## Go
+- How to cancel a task running in a gorutine?
+- is it possible to have strict deserialization of json? Absent field is an error, not a default value.
+
+## Chi 
+- Why 405 instead of 404
+- Is it possible to use other logging libraries? For example, zap.
+- How to log responses? Do I need to write my own middleware?
+- How to mask headers? For example session token
+
+## Logging
+- How to mask fields of structures?
+- How to add some constant fields to all logs?
+- How to have different logging configs? For local, test, prod envs.
+
+## Testing
+- How to write test description as a normal long sentence instead of a camel case function name?
