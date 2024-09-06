@@ -1,9 +1,10 @@
-package administration
+package httpapi
 
 import (
 	"strings"
 	"testing"
 
+	"github.com/optician/meeting-room-booking/internal/administration/models"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestNewRoomDeserialization(t *testing.T) {
 		"stage":20,
 		"labels":["video","projector"]
 	}`
-	expected := NewRoomInfo{
+	expected := models.NewRoomInfo{
 		Name:     "Belyash",
 		Capacity: 5,
 		Office:   "BC Utopia",
@@ -31,7 +32,7 @@ func TestNewRoomDeserialization(t *testing.T) {
 }
 
 func TestNewRoomCapacityValidationFailed(t *testing.T) {
-	data := NewRoomInfo {
+	data := models.NewRoomInfo {
 		Name:     "Belyash",
 		Capacity: 0,
 		Office:   "BC Utopia",
@@ -45,7 +46,7 @@ func TestNewRoomCapacityValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomNameValidationFailed(t *testing.T) {
-	data := NewRoomInfo {
+	data := models.NewRoomInfo {
 		Name:     "",
 		Capacity: 10,
 		Office:   "BC Utopia",
@@ -59,7 +60,7 @@ func TestNewRoomNameValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomOfficeValidationFailed(t *testing.T) {
-	data := NewRoomInfo {
+	data := models.NewRoomInfo {
 		Name:     "Echpochmak",
 		Capacity: 10,
 		Office:   "",
@@ -73,7 +74,7 @@ func TestNewRoomOfficeValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomValidationPassed(t *testing.T) {
-	data := NewRoomInfo{
+	data := models.NewRoomInfo{
 		Name:     "Belyash",
 		Capacity: 1,
 		Office:   "BC Utopia",
@@ -98,7 +99,7 @@ func TestRoomDeserialization(t *testing.T) {
 		"stage":20,
 		"labels":["video","projector"]
 	  }`
-	expected := RoomInfo{
+	expected := models.RoomInfo{
 		Id:       "123",
 		Name:     "Belyash",
 		Capacity: 5,
@@ -114,7 +115,7 @@ func TestRoomDeserialization(t *testing.T) {
 }
 
 func TestRoomCapacityValidationFailed(t *testing.T) {
-	data := RoomInfo{
+	data := models.RoomInfo{
 		Id:       "123",
 		Name:     "Belyash",
 		Capacity: 0,
@@ -129,7 +130,7 @@ func TestRoomCapacityValidationFailed(t *testing.T) {
 }
 
 func TestRoomIdValidationFailed(t *testing.T) {
-	data := RoomInfo{
+	data := models.RoomInfo{
 		Id:       "",
 		Name:     "Belyash",
 		Capacity: 5,
@@ -144,7 +145,7 @@ func TestRoomIdValidationFailed(t *testing.T) {
 }
 
 func TestRoomNameValidationFailed(t *testing.T) {
-	data := RoomInfo{
+	data := models.RoomInfo{
 		Id:       "123",
 		Name:     "",
 		Capacity: 5,
@@ -159,7 +160,7 @@ func TestRoomNameValidationFailed(t *testing.T) {
 }
 
 func TestRoomOfficeValidationFailed(t *testing.T) {
-	data := RoomInfo{
+	data := models.RoomInfo{
 		Id:       "123",
 		Name:     "Matnakash",
 		Capacity: 5,
@@ -174,7 +175,7 @@ func TestRoomOfficeValidationFailed(t *testing.T) {
 }
 
 func TestRoomValidationPassed(t *testing.T) {
-	data := RoomInfo{
+	data := models.RoomInfo{
 		Id:       "123",
 		Name:     "Belyash",
 		Capacity: 1,

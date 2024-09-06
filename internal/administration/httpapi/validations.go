@@ -1,23 +1,16 @@
-package administration
+package httpapi
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+
+	"github.com/optician/meeting-room-booking/internal/administration/models"
 )
 
-type RoomInfo struct {
-	Id       string   `json:"id"`
-	Name     string   `json:"name"`
-	Capacity int      `json:"capacity"`
-	Office   string   `json:"office"`
-	Stage    int      `json:"stage"`
-	Labels   []string `json:"labels"`
-}
-
-func deserializeRoom(stream io.Reader) (RoomInfo, error) {
-	room := &RoomInfo{}
+func deserializeRoom(stream io.Reader) (models.RoomInfo, error) {
+	room := &models.RoomInfo{}
 	if err := json.NewDecoder(stream).Decode(room); err != nil {
 		return *room, fmt.Errorf("can't deserialize RoomInfo: %w", err)
 	} else {
@@ -25,7 +18,7 @@ func deserializeRoom(stream io.Reader) (RoomInfo, error) {
 	}
 }
 
-func validateRoomInfo(room *RoomInfo) (RoomInfo, error) {
+func validateRoomInfo(room *models.RoomInfo) (models.RoomInfo, error) {
 	if room.Capacity < 1 {
 		return *room, errors.New("room can't have 0 or less capacity")
 	}
@@ -42,7 +35,7 @@ func validateRoomInfo(room *RoomInfo) (RoomInfo, error) {
 	return *room, nil
 }
 
-func fromBytesRoom(stream io.Reader) (RoomInfo, error) {
+func fromBytesRoom(stream io.Reader) (models.RoomInfo, error) {
 	if room, err := deserializeRoom(stream); err != nil {
 		return room, err
 	} else {
@@ -50,16 +43,8 @@ func fromBytesRoom(stream io.Reader) (RoomInfo, error) {
 	}
 }
 
-type NewRoomInfo struct {
-	Name     string   `json:"name"`
-	Capacity int      `json:"capacity"`
-	Office   string   `json:"office"`
-	Stage    int      `json:"stage"`
-	Labels   []string `json:"labels"`
-}
-
-func deserializeNewRoom(stream io.Reader) (NewRoomInfo, error) {
-	room := &NewRoomInfo{}
+func deserializeNewRoom(stream io.Reader) (models.NewRoomInfo, error) {
+	room := &models.NewRoomInfo{}
 	if err := json.NewDecoder(stream).Decode(room); err != nil {
 		return *room, fmt.Errorf("can't deserialize NewRoomInfo: %w", err)
 	} else {
@@ -67,7 +52,7 @@ func deserializeNewRoom(stream io.Reader) (NewRoomInfo, error) {
 	}
 }
 
-func validateNewRoomInfo(newRoom *NewRoomInfo) (NewRoomInfo, error) {
+func validateNewRoomInfo(newRoom *models.NewRoomInfo) (models.NewRoomInfo, error) {
 	if newRoom.Capacity < 1 {
 		return *newRoom, errors.New("room can't have 0 or less capacity")
 	}
@@ -81,7 +66,7 @@ func validateNewRoomInfo(newRoom *NewRoomInfo) (NewRoomInfo, error) {
 	return *newRoom, nil
 }
 
-func fromBytesNewRoom(stream io.Reader) (NewRoomInfo, error) {
+func fromBytesNewRoom(stream io.Reader) (models.NewRoomInfo, error) {
 	if room, err := deserializeNewRoom(stream); err != nil {
 		return room, err
 	} else {

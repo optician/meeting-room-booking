@@ -1,4 +1,4 @@
-package administration
+package httpapi
 
 import (
 	"net/http"

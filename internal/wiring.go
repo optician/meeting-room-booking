@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog/v2"
-	"github.com/optician/meeting-room-booking/internal/httpapi/administration"
+	"github.com/optician/meeting-room-booking/internal/administration/httpapi"
 )
 
 func Make(logger *httplog.Logger) chi.Router {
@@ -33,7 +33,7 @@ func Make(logger *httplog.Logger) chi.Router {
 		middleware.Recoverer,
 	)
 
-	r.Group(administration.Make)
+	r.Group(httpapi.Make)
 
 	return r
 }

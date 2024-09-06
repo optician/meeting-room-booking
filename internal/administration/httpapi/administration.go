@@ -1,10 +1,11 @@
-package administration
+package httpapi
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/optician/meeting-room-booking/internal/administration/models"
 	"go.uber.org/zap"
 )
 
@@ -34,7 +35,7 @@ func (ctrl Controller) routes(r chi.Router) {
 
 func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	logicChannel := make(chan []RoomInfo)
+	logicChannel := make(chan []models.RoomInfo)
 	go getRooms(&logicChannel)
 
 	select {
@@ -52,8 +53,8 @@ func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func getRooms(listener *chan []RoomInfo) {
-	*listener <- []RoomInfo{RoomInfo{Id: "123", Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
+func getRooms(listener *chan []models.RoomInfo) {
+	*listener <- []models.RoomInfo{{Id: "123", Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
 }
 
 func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +83,7 @@ func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (ctrl Controller) createRoom(newRoom *NewRoomInfo) error {
+func (ctrl Controller) createRoom(newRoom *models.NewRoomInfo) error {
 	ctrl.logger.Infof("recieved a new room %v", *newRoom)
 	return nil
 }
@@ -118,6 +119,6 @@ func (ctrl Controller) updateRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func updateRoom(_ *RoomInfo) error {
+func updateRoom(_ *models.RoomInfo) error {
 	return nil
 }
