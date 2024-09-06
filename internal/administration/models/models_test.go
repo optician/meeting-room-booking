@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewRoomCapacityValidationFailed(t *testing.T) {
-	data := NewRoomInfo {
+	data := NewRoomInfo{
 		Name:     "Belyash",
 		Capacity: 0,
 		Office:   "BC Utopia",
@@ -21,7 +21,7 @@ func TestNewRoomCapacityValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomNameValidationFailed(t *testing.T) {
-	data := NewRoomInfo {
+	data := NewRoomInfo{
 		Name:     "",
 		Capacity: 10,
 		Office:   "BC Utopia",
@@ -35,7 +35,7 @@ func TestNewRoomNameValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomOfficeValidationFailed(t *testing.T) {
-	data := NewRoomInfo {
+	data := NewRoomInfo{
 		Name:     "Echpochmak",
 		Capacity: 10,
 		Office:   "",

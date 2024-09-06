@@ -32,7 +32,7 @@ func TestNewRoomDeserialization(t *testing.T) {
 }
 
 func TestNewRoomCapacityValidationFailed(t *testing.T) {
-	data := models.NewRoomInfo {
+	data := models.NewRoomInfo{
 		Name:     "Belyash",
 		Capacity: 0,
 		Office:   "BC Utopia",
@@ -46,7 +46,7 @@ func TestNewRoomCapacityValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomNameValidationFailed(t *testing.T) {
-	data := models.NewRoomInfo {
+	data := models.NewRoomInfo{
 		Name:     "",
 		Capacity: 10,
 		Office:   "BC Utopia",
@@ -60,7 +60,7 @@ func TestNewRoomNameValidationFailed(t *testing.T) {
 }
 
 func TestNewRoomOfficeValidationFailed(t *testing.T) {
-	data := models.NewRoomInfo {
+	data := models.NewRoomInfo{
 		Name:     "Echpochmak",
 		Capacity: 10,
 		Office:   "",

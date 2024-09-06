@@ -12,16 +12,16 @@ import (
 
 type Controller struct {
 	logger *zap.SugaredLogger
-	logic *service.Logic
+	logic  *service.Logic
 }
 
 // mutates router
-func Make(logic *service.Logic, logger *zap.SugaredLogger) func (chi.Router) {
+func Make(logic *service.Logic, logger *zap.SugaredLogger) func(chi.Router) {
 	defer logger.Sync()
 
 	controller := Controller{
 		logger: logger,
-		logic: logic,
+		logic:  logic,
 	}
 	return controller.routes
 }

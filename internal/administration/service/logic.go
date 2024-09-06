@@ -10,7 +10,7 @@ type Logic interface {
 
 	Update(room *models.RoomInfo) error
 
-	List() ([]models.RoomInfo, error) 
+	List() ([]models.RoomInfo, error)
 
 	Delete(id string) error
 }
@@ -22,7 +22,7 @@ type impl struct {
 func Make(logger *zap.SugaredLogger) Logic {
 	defer logger.Sync()
 
-	return impl { 
+	return impl{
 		logger: logger,
 	}
 }
