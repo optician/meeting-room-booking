@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog/v2"
+	"github.com/optician/meeting-room-booking/internal/administration/db"
 	"github.com/optician/meeting-room-booking/internal/administration/httpapi"
 	"github.com/optician/meeting-room-booking/internal/administration/service"
 	"go.uber.org/zap"
@@ -15,7 +16,8 @@ import (
 func Make(logger *httplog.Logger) chi.Router {
 	zapLogger := zap.NewExample().Sugar()
 
-	adminLogic := service.Make(zapLogger)
+	roomsDB := db.New()
+	adminLogic := service.Make(&roomsDB, zapLogger)
 
 	r := chi.NewRouter()
 

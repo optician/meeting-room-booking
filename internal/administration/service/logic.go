@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/optician/meeting-room-booking/internal/administration/db"
 	"github.com/optician/meeting-room-booking/internal/administration/models"
 	"go.uber.org/zap"
 )
@@ -17,32 +18,35 @@ type Logic interface {
 
 type impl struct {
 	logger *zap.SugaredLogger
+	db     *db.DB
 }
 
-func Make(logger *zap.SugaredLogger) Logic {
+func Make(db *db.DB, logger *zap.SugaredLogger) Logic {
 	defer logger.Sync()
 
 	return impl{
 		logger: logger,
+		db:     db,
 	}
 }
 
 func (impl impl) Create(room *models.NewRoomInfo) error {
 	impl.logger.Infof("recieved a new room %v", *room)
-	return nil
+	_, err := (*impl.db).Create(*room) // wrap error
+	return err                         // retutn id
 }
 
 func (impl impl) Update(room *models.RoomInfo) error {
 	impl.logger.Infof("recieved an updated room %v", *room)
-	return nil
+	return (*impl.db).Update(*room) // wrap error
 }
 
 func (impl impl) List() ([]models.RoomInfo, error) {
-	list := []models.RoomInfo{{Id: "123", Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
-	return list, nil
+	list, err := (*impl.db).List() // wrap error
+	return list, err
 }
 
 func (impl impl) Delete(id string) error {
 	impl.logger.Infof("delete %v room", id)
-	return nil
+	return (*impl.db).Delete(id) // wrap error
 }

@@ -61,6 +61,7 @@ Why postgres and kafka? They are very popular and I have experience with both of
 ## Go
 - How to cancel a task running in a gorutine?
 - is it possible to have strict deserialization of json? Absent field is an error, not a default value.
+- Is there a reliable way to deal with nil dependencies? Or how to get compile errors for missed fields in a struct?
 
 ## Chi 
 - Why 405 instead of 404
@@ -77,3 +78,6 @@ Why postgres and kafka? They are very popular and I have experience with both of
 ## Testing
 - How to write test description as a normal long sentence instead of a camel case function name?
 - how to separate test files from main code
+
+## IDE
+- How to implement all functions of an interface for a structure
