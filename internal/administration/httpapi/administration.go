@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/optician/meeting-room-booking/internal/administration/models"
 	"github.com/optician/meeting-room-booking/internal/administration/service"
 	"go.uber.org/zap"
@@ -74,11 +75,12 @@ func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Reque
 			ctrl.logger.Errorf("Bad Request. Invalid NewRoomInfo: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-		} else if err := ctrl.createRoom(&room); err != nil {
+		} else if json, err := ctrl.createRoom(&room); err != nil {
 			ctrl.logger.Errorf("failed to create a new room: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(json))
 		}
 	}()
 
@@ -89,15 +91,28 @@ func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (ctrl Controller) createRoom(newRoom *models.NewRoomInfo) error {
-	return (*ctrl.logic).Create(newRoom)
+// the idea is to prepare answer and errors
+// there is only common logic in the controller method
+// maybe it helps to generalize controllers and avoid repetition of a fragile error processing
+func (ctrl Controller) createRoom(newRoom *models.NewRoomInfo) (string, error) {
+	if id, err := (*ctrl.logic).Create(newRoom); err != nil {
+		return "", err
+	} else {
+		response := CreationResponse{Id: id}
+		if json, err := json.Marshal(response); err != nil {
+			ctrl.logger.Errorf("room creation failed, %v", err)
+			return "", err
+		} else {
+			return string(json), nil
+		}
+	}
 }
 
 func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	strId := chi.URLParam(r, "id")
 
-	if id == "" {
-		ctrl.logger.Error("deletion of a room called without id")
+	if id, err := uuid.Parse(strId); err != nil {
+		ctrl.logger.Error(`deletion of a room called wit malformed id "%v"`, strId)
 		w.WriteHeader(http.StatusBadRequest)
 	} else if err := ctrl.deleteRoom(id); err != nil {
 		ctrl.logger.Errorf("Deletion of %v room raised error: %v", id, err)
@@ -107,7 +122,7 @@ func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (ctrl Controller) deleteRoom(id string) error {
+func (ctrl Controller) deleteRoom(id uuid.UUID) error {
 	return (*ctrl.logic).Delete(id)
 }
 

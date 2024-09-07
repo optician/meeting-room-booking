@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/optician/meeting-room-booking/internal/administration/models"
 	"github.com/optician/meeting-room-booking/internal/administration/service"
 	"github.com/stretchr/testify/require"
@@ -172,8 +173,8 @@ func TestDeleteRoomSuccessfully(t *testing.T) {
 
 type logicStub struct{}
 
-func (logicStub) Create(room *models.NewRoomInfo) error {
-	return nil
+func (logicStub) Create(room *models.NewRoomInfo) (uuid.UUID, error) {
+	return uuid.New(), nil
 }
 
 func (logicStub) Update(room *models.RoomInfo) error {
@@ -185,6 +186,6 @@ func (logicStub) List() ([]models.RoomInfo, error) {
 	return list, nil
 }
 
-func (logicStub) Delete(id string) error {
+func (logicStub) Delete(id uuid.UUID) error {
 	return nil
 }

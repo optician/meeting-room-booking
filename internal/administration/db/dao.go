@@ -1,12 +1,15 @@
 package db
 
-import "github.com/optician/meeting-room-booking/internal/administration/models"
+import (
+	"github.com/google/uuid"
+	"github.com/optician/meeting-room-booking/internal/administration/models"
+)
 
 type DB interface {
 	List() ([]models.RoomInfo, error)
 	Update(models.RoomInfo) error
-	Create(models.NewRoomInfo) (string, error)
-	Delete(string) error
+	Create(models.NewRoomInfo) (uuid.UUID, error)
+	Delete(uuid.UUID) error
 }
 
 type impl struct{}
@@ -22,9 +25,10 @@ func (impl) List() ([]models.RoomInfo, error) {
 func (impl) Update(models.RoomInfo) error {
 	return nil
 }
-func (impl) Create(models.NewRoomInfo) (string, error) {
-	return "bla-bla", nil
+func (impl) Create(models.NewRoomInfo) (uuid.UUID, error) {
+	id := uuid.New()
+	return id, nil
 }
-func (impl) Delete(string) error {
+func (impl) Delete(id uuid.UUID) error {
 	return nil
 }
