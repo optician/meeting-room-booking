@@ -44,7 +44,7 @@ func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request
 	select {
 	case <-ctx.Done():
 		return
-	case result := <-logicChannel:
+	case result := <-logicChannel: // need to work with errors (right now all errors will wait timeout)
 		json, err := json.Marshal(result)
 		if err == nil {
 			w.Header().Add("content-type", "application/json")
@@ -59,6 +59,7 @@ func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request
 func (ctrl Controller) getRooms(listener *chan []models.RoomInfo) {
 	if list, err := (*ctrl.logic).List(); err != nil {
 		ctrl.logger.Errorf("internal error: %v", err)
+		// close(*listener)   // need to send error too
 	} else {
 		*listener <- list
 	}
@@ -114,7 +115,7 @@ func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Reque
 	if id, err := uuid.Parse(strId); err != nil {
 		ctrl.logger.Error(`deletion of a room called wit malformed id "%v"`, strId)
 		w.WriteHeader(http.StatusBadRequest)
-	} else if err := ctrl.deleteRoom(id); err != nil {
+	} else if err := ctrl.deleteRoom(&id); err != nil {
 		ctrl.logger.Errorf("Deletion of %v room raised error: %v", id, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
@@ -122,7 +123,7 @@ func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (ctrl Controller) deleteRoom(id uuid.UUID) error {
+func (ctrl Controller) deleteRoom(id *uuid.UUID) error {
 	return (*ctrl.logic).Delete(id)
 }
 

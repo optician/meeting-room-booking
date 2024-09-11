@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -10,13 +11,21 @@ import (
 	"github.com/optician/meeting-room-booking/internal/administration/db"
 	"github.com/optician/meeting-room-booking/internal/administration/httpapi"
 	"github.com/optician/meeting-room-booking/internal/administration/service"
+	"github.com/optician/meeting-room-booking/internal/dbPool"
 	"go.uber.org/zap"
 )
 
 func Make(logger *httplog.Logger) chi.Router {
 	zapLogger := zap.NewExample().Sugar()
 
-	roomsDB := db.New()
+	dbPool, dbPoolErr := dbPool.NewDBPool(zapLogger)
+	if dbPoolErr != nil {
+		zapLogger.Fatalf("application terminated: %v", dbPoolErr)
+		os.Exit(-1)
+	}
+	// defer dbPool.Close()  // how to close correctly
+
+	roomsDB := db.New(dbPool.GetPool(), zapLogger)
 	adminLogic := service.Make(&roomsDB, zapLogger)
 
 	r := chi.NewRouter()

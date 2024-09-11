@@ -186,6 +186,6 @@ func (logicStub) List() ([]models.RoomInfo, error) {
 	return list, nil
 }
 
-func (logicStub) Delete(id uuid.UUID) error {
+func (logicStub) Delete(id *uuid.UUID) error {
 	return nil
 }
