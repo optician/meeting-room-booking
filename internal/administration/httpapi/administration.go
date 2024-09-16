@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -27,7 +28,7 @@ func Make(logic *service.Logic, logger *zap.SugaredLogger) func(chi.Router) {
 	return controller.routes
 }
 
-func (ctrl Controller) routes(r chi.Router) {
+func (ctrl *Controller) routes(r chi.Router) {
 	r.Route("/rooms", func(r chi.Router) {
 		r.Get("/", ctrl.getRoomsController)
 		r.Post("/create", ctrl.createRoomController)
@@ -36,10 +37,10 @@ func (ctrl Controller) routes(r chi.Router) {
 	})
 }
 
-func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request) {
+func (ctrl *Controller) getRoomsController(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logicChannel := make(chan []models.RoomInfo)
-	go ctrl.getRooms(&logicChannel)
+	go ctrl.getRooms(ctx, &logicChannel)
 
 	select {
 	case <-ctx.Done():
@@ -56,8 +57,8 @@ func (ctrl Controller) getRoomsController(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (ctrl Controller) getRooms(listener *chan []models.RoomInfo) {
-	if list, err := (*ctrl.logic).List(); err != nil {
+func (ctrl *Controller) getRooms(ctx context.Context, listener *chan []models.RoomInfo) {
+	if list, err := (*ctrl.logic).List(ctx); err != nil {
 		ctrl.logger.Errorf("internal error: %v", err)
 		// close(*listener)   // need to send error too
 	} else {
@@ -65,7 +66,7 @@ func (ctrl Controller) getRooms(listener *chan []models.RoomInfo) {
 	}
 }
 
-func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Request) {
+func (ctrl *Controller) createRoomController(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logicChannel := make(chan any)
 
@@ -76,7 +77,7 @@ func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Reque
 			ctrl.logger.Errorf("Bad Request. Invalid NewRoomInfo: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-		} else if json, err := ctrl.createRoom(&room); err != nil {
+		} else if json, err := ctrl.createRoom(ctx, &room); err != nil {
 			ctrl.logger.Errorf("failed to create a new room: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
@@ -95,8 +96,8 @@ func (ctrl Controller) createRoomController(w http.ResponseWriter, r *http.Reque
 // the idea is to prepare answer and errors
 // there is only common logic in the controller method
 // maybe it helps to generalize controllers and avoid repetition of a fragile error processing
-func (ctrl Controller) createRoom(newRoom *models.NewRoomInfo) (string, error) {
-	if id, err := (*ctrl.logic).Create(newRoom); err != nil {
+func (ctrl *Controller) createRoom(ctx context.Context, newRoom *models.NewRoomInfo) (string, error) {
+	if id, err := (*ctrl.logic).Create(ctx, newRoom); err != nil {
 		return "", err
 	} else {
 		response := CreationResponse{Id: id}
@@ -109,13 +110,13 @@ func (ctrl Controller) createRoom(newRoom *models.NewRoomInfo) (string, error) {
 	}
 }
 
-func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Request) {
+func (ctrl *Controller) deleteRoomController(w http.ResponseWriter, r *http.Request) {
 	strId := chi.URLParam(r, "id")
 
 	if id, err := uuid.Parse(strId); err != nil {
 		ctrl.logger.Error(`deletion of a room called wit malformed id "%v"`, strId)
 		w.WriteHeader(http.StatusBadRequest)
-	} else if err := ctrl.deleteRoom(&id); err != nil {
+	} else if err := ctrl.deleteRoom(r.Context(), &id); err != nil {
 		ctrl.logger.Errorf("Deletion of %v room raised error: %v", id, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
@@ -123,16 +124,16 @@ func (ctrl Controller) deleteRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (ctrl Controller) deleteRoom(id *uuid.UUID) error {
-	return (*ctrl.logic).Delete(id)
+func (ctrl *Controller) deleteRoom(ctx context.Context, id *uuid.UUID) error {
+	return (*ctrl.logic).Delete(ctx, id)
 }
 
-func (ctrl Controller) updateRoomController(w http.ResponseWriter, r *http.Request) {
+func (ctrl *Controller) updateRoomController(w http.ResponseWriter, r *http.Request) {
 	if room, err := fromBytesRoom(r.Body); err != nil {
 		ctrl.logger.Errorf("Bad Request. Invalid RoomInfo: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
-	} else if err := ctrl.updateRoom(&room); err != nil {
+	} else if err := ctrl.updateRoom(r.Context(), &room); err != nil {
 		ctrl.logger.Errorf("Update of %v room raised error: %v", room, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
@@ -140,6 +141,6 @@ func (ctrl Controller) updateRoomController(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (ctrl Controller) updateRoom(room *models.RoomInfo) error {
-	return (*ctrl.logic).Update(room)
+func (ctrl *Controller) updateRoom(ctx context.Context, room *models.RoomInfo) error {
+	return (*ctrl.logic).Update(ctx, room)
 }

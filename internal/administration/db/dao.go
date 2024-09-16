@@ -12,10 +12,10 @@ import (
 )
 
 type DB interface {
-	List() ([]models.RoomInfo, error)
-	Update(*models.RoomInfo) error
-	Create(*models.NewRoomInfo) (uuid.UUID, error)
-	Delete(*uuid.UUID) error
+	List(context.Context) ([]models.RoomInfo, error)
+	Update(context.Context, *models.RoomInfo) error
+	Create(context.Context, *models.NewRoomInfo) (uuid.UUID, error)
+	Delete(context.Context, *uuid.UUID) error
 }
 
 type impl struct {
@@ -31,16 +31,14 @@ func New(dbPool *pgxpool.Pool, logger *zap.SugaredLogger) DB {
 }
 
 // slice can't be nil if error is nil
-func (impl *impl) List() ([]models.RoomInfo, error) {
+func (impl *impl) List(ctx context.Context) ([]models.RoomInfo, error) {
 	list := make([]models.RoomInfo, 0)
-	ctx := context.Background() // ?
 	query := "select id, name, capacity, office, stage, labels from meeting_rooms"
 	err := pgxscan.Select(ctx, impl.dbpool, &list, query)
 	return list, err // wrap error
 }
 
-func (impl *impl) Update(room *models.RoomInfo) error {
-	ctx := context.Background() // ?
+func (impl *impl) Update(ctx context.Context, room *models.RoomInfo) error {
 	query := `update meeting_room 
 				set 
 					name = @name
@@ -61,9 +59,8 @@ func (impl *impl) Update(room *models.RoomInfo) error {
 	return err // wrap error, check existance error
 }
 
-func (impl *impl) Create(room *models.NewRoomInfo) (uuid.UUID, error) {
+func (impl *impl) Create(ctx context.Context, room *models.NewRoomInfo) (uuid.UUID, error) {
 	id := uuid.New()
-	ctx := context.Background() // ?
 	query := `insert into meeting_rooms 
 				(
 					id, 
@@ -94,10 +91,9 @@ func (impl *impl) Create(room *models.NewRoomInfo) (uuid.UUID, error) {
 	return id, err // wrap error, check constraints violations
 }
 
-func (impl *impl) Delete(id *uuid.UUID) error {
-	ctx := context.Background() // ?
+func (impl *impl) Delete(ctx context.Context, id *uuid.UUID) error {
 	query := "delete from meeting_room where id = @id"
 	args := pgx.NamedArgs{"id": id}
 	_, err := impl.dbpool.Exec(ctx, query, args)
-	return err  // wrap error
+	return err // wrap error
 }

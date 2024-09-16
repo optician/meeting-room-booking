@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -173,19 +174,19 @@ func TestDeleteRoomSuccessfully(t *testing.T) {
 
 type logicStub struct{}
 
-func (logicStub) Create(room *models.NewRoomInfo) (uuid.UUID, error) {
+func (logicStub) Create(ctx context.Context, room *models.NewRoomInfo) (uuid.UUID, error) {
 	return uuid.New(), nil
 }
 
-func (logicStub) Update(room *models.RoomInfo) error {
+func (logicStub) Update(ctx context.Context, room *models.RoomInfo) error {
 	return nil
 }
 
-func (logicStub) List() ([]models.RoomInfo, error) {
+func (logicStub) List(ctx context.Context) ([]models.RoomInfo, error) {
 	list := []models.RoomInfo{{Id: "123", Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
 	return list, nil
 }
 
-func (logicStub) Delete(id *uuid.UUID) error {
+func (logicStub) Delete(ctx context.Context, id *uuid.UUID) error {
 	return nil
 }
