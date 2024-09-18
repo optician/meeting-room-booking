@@ -12,13 +12,17 @@ type DbPool interface {
 	Close()
 }
 
+type DBConfig struct {
+	Url string `koanf:"url"`
+}
+
 // wrapper is for simplification of initialization during wiring
 type poolImpl struct {
 	Pool *pgxpool.Pool
 }
 
-func NewDBPool(logger *zap.SugaredLogger) (DbPool, error) {
-	dbpool, err := pgxpool.New(context.Background(), "postgresql://test:test@0.0.0.0:5432/booking?connect_timeout=10&application_name=booking") // config
+func NewDBPool(config *DBConfig, logger *zap.SugaredLogger) (DbPool, error) {
+	dbpool, err := pgxpool.New(context.Background(), config.Url)
 
 	c := context.Background()
 	if err := dbpool.Ping(c); err != nil {

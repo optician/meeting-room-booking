@@ -15,18 +15,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func Make(logger *httplog.Logger) chi.Router {
-	zapLogger := zap.NewExample().Sugar()
-
-	dbPool, dbPoolErr := dbPool.NewDBPool(zapLogger)
+func Make(httpLogger *httplog.Logger, logger *zap.SugaredLogger, config *Config) chi.Router {
+	dbPool, dbPoolErr := dbPool.NewDBPool(&config.DB, logger)
 	if dbPoolErr != nil {
-		zapLogger.Fatalf("application terminated: %v", dbPoolErr)
+		logger.Fatalf("application terminated: %v", dbPoolErr)
 		os.Exit(-1)
 	}
-	// defer dbPool.Close()  // how to close correctly
+	// defer dbPool.Close()  // how to close correctly?
 
-	roomsDB := db.New(dbPool.GetPool(), zapLogger)
-	adminLogic := service.Make(&roomsDB, zapLogger)
+	roomsDB := db.New(dbPool.GetPool(), logger)
+	adminLogic := service.Make(&roomsDB, logger)
 
 	r := chi.NewRouter()
 
@@ -42,7 +40,7 @@ func Make(logger *httplog.Logger) chi.Router {
 	r.Use(
 		middleware.Heartbeat("/liveness"),
 		middleware.Heartbeat("/readiness"), // usually it's ok, especially because I don't have a k8s at the moment
-		httplog.RequestLogger(logger),
+		httplog.RequestLogger(httpLogger),
 		middleware.CleanPath,
 		middleware.ContentCharset(allowedCharsets...),
 		cors.Handler(corsOptions),
@@ -50,7 +48,7 @@ func Make(logger *httplog.Logger) chi.Router {
 		middleware.Recoverer,
 	)
 
-	r.Group(httpapi.Make(&adminLogic, zapLogger))
+	r.Group(httpapi.Make(&adminLogic, logger))
 
 	return r
 }

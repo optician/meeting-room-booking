@@ -56,10 +56,25 @@ p.s. Users here are a mix of humans and other softwares. It's for simplicity bec
 
 Why postgres and kafka? They are very popular and I have experience with both of them. 
 
+# What implemented
+- There is only room management API: create, update, list, delete. 
+- Application has configuration in `config/$env/`. 
+- Application has DB migrations via tern in `migrations/` directory,
+- Structured logging. But there are 2 libraries. Either need to figure out how to use zap as a server logging or try another http library (chi looks poor).
+
+## How to run
+- Run postgresql
+- Update conf/local/application.toml
+- Run from source code
+  ```bash
+  tern migrate
+  go run cmd/main.go -- /path/to/config/file
+  ```
+
 # Questions for the Future
 
 ## Go
-- How to cancel a task running in a gorutine?
+- ~~How to cancel a task running in a gorutine?~~ context
 - is it possible to have strict deserialization of json? Absent field is an error, not a default value.
 - Is there a reliable way to deal with nil dependencies? Or how to get compile errors for missed fields in a struct?
 
