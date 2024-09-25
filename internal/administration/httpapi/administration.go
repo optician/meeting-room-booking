@@ -114,7 +114,7 @@ func (ctrl *Controller) deleteRoomController(w http.ResponseWriter, r *http.Requ
 	strId := chi.URLParam(r, "id")
 
 	if id, err := uuid.Parse(strId); err != nil {
-		ctrl.logger.Error(`deletion of a room called wit malformed id "%v"`, strId)
+		ctrl.logger.Error(`deletion of a room called with malformed id "%v"`, strId)
 		w.WriteHeader(http.StatusBadRequest)
 	} else if err := ctrl.deleteRoom(r.Context(), &id); err != nil {
 		ctrl.logger.Errorf("Deletion of %v room raised error: %v", id, err)

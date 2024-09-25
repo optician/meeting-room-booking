@@ -56,8 +56,11 @@ p.s. Users here are a mix of humans and other softwares. It's for simplicity bec
 
 Why postgres and kafka? They are very popular and I have experience with both of them. 
 
-# What implemented
-- There is only room management API: create, update, list, delete. 
+# What is implemented
+
+Note: It's not an example of an application with full functionality, observability and acceptable test coverage! It's a training ground for the new stack.
+
+- #6 There is only room management API: create, update, list, delete. 
 - Application has configuration in `config/$env/`. 
 - Application has DB migrations via tern in `migrations/` directory,
 - Structured logging. But there are 2 libraries. Either need to figure out how to use zap as a server logging or try another http library (chi looks poor).

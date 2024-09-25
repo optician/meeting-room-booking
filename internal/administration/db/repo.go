@@ -39,12 +39,12 @@ func (impl *impl) List(ctx context.Context) ([]models.RoomInfo, error) {
 }
 
 func (impl *impl) Update(ctx context.Context, room *models.RoomInfo) error {
-	query := `update meeting_room 
+	query := `update meeting_rooms 
 				set 
-					name = @name
-					capacity = @capacity
-					office = @office
-					stage = @stage
+					name = @name,
+					capacity = @capacity,
+					office = @office,
+					stage = @stage,
 					labels = @labels
 				where id = @id`
 	args := pgx.NamedArgs{
@@ -92,7 +92,7 @@ func (impl *impl) Create(ctx context.Context, room *models.NewRoomInfo) (uuid.UU
 }
 
 func (impl *impl) Delete(ctx context.Context, id *uuid.UUID) error {
-	query := "delete from meeting_room where id = @id"
+	query := "delete from meeting_rooms where id = @id"
 	args := pgx.NamedArgs{"id": id}
 	_, err := impl.dbpool.Exec(ctx, query, args)
 	return err // wrap error

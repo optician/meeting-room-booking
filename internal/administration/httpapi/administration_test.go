@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -41,10 +42,11 @@ func TestListRoomsSuccessfully(t *testing.T) {
 	// Execute Request
 	response := executeRequest(req, r)
 
-	// Check the response code
 	checkResponseCode(t, http.StatusOK, response.Code)
-	expected := `[{"id":"123","name":"Belyash","capacity":5,"office":"BC Utopia","stage":20,"labels":["video","projector"]}]`
-	// We can use testify/require to assert values, as it is more convenient
+	expected := fmt.Sprintf(
+		`[{"id":"%v","name":"Belyash","capacity":5,"office":"BC Utopia","stage":20,"labels":["video","projector"]}]`,
+		stubId,
+	)
 	require.Equal(t, expected, response.Body.String())
 }
 
@@ -64,14 +66,12 @@ func TestCreateRoomSuccessfully(t *testing.T) {
 	}`
 	req, _ := http.NewRequest("POST", "/rooms/create", strings.NewReader(json))
 
-	// Execute Request
+	expected := fmt.Sprintf(`{"id":"%v"}`, stubId)
+
 	response := executeRequest(req, r)
 
-	// Check the response code
 	checkResponseCode(t, http.StatusOK, response.Code)
-
-	// We can use testify/require to assert values, as it is more convenient
-	require.Equal(t, "", response.Body.String())
+	require.Equal(t, expected, response.Body.String())
 }
 
 func TestCreateRoomWithBadRequest(t *testing.T) {
@@ -94,10 +94,7 @@ func TestCreateRoomWithBadRequest(t *testing.T) {
 	// Execute Request
 	response := executeRequest(req, r)
 
-	// Check the response code
 	checkResponseCode(t, http.StatusBadRequest, response.Code)
-
-	// We can use testify/require to assert values, as it is more convenient
 	require.Equal(t, "room name can't be empty", response.Body.String())
 }
 
@@ -116,15 +113,10 @@ func TestUpdateRoomSuccessfully(t *testing.T) {
 		"stage":20,
 		"labels":["video","projector"]
 	}`
-	req, _ := http.NewRequest("POST", "/rooms/create", strings.NewReader(json))
-
-	// Execute Request
+	req, _ := http.NewRequest("POST", "/rooms/update", strings.NewReader(json))
 	response := executeRequest(req, r)
 
-	// Check the response code
 	checkResponseCode(t, http.StatusOK, response.Code)
-
-	// We can use testify/require to assert values, as it is more convenient
 	require.Equal(t, "", response.Body.String())
 }
 
@@ -148,10 +140,7 @@ func TestUpdateRoomWithBadRequest(t *testing.T) {
 	// Execute Request
 	response := executeRequest(req, r)
 
-	// Check the response code
 	checkResponseCode(t, http.StatusBadRequest, response.Code)
-
-	// We can use testify/require to assert values, as it is more convenient
 	require.Equal(t, "room id can't be empty", response.Body.String())
 }
 
@@ -160,22 +149,21 @@ func TestDeleteRoomSuccessfully(t *testing.T) {
 	r := chi.NewRouter()
 	r.Route("/", Make(&logic, logger))
 
-	req, _ := http.NewRequest("DELETE", "/rooms/541", nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/rooms/%v", stubId), nil)
 
 	// Execute Request
 	response := executeRequest(req, r)
 
-	// Check the response code
 	checkResponseCode(t, http.StatusOK, response.Code)
-
-	// We can use testify/require to assert values, as it is more convenient
 	require.Equal(t, "", response.Body.String())
 }
 
 type logicStub struct{}
 
+var stubId = uuid.New()
+
 func (logicStub) Create(ctx context.Context, room *models.NewRoomInfo) (uuid.UUID, error) {
-	return uuid.New(), nil
+	return stubId, nil
 }
 
 func (logicStub) Update(ctx context.Context, room *models.RoomInfo) error {
@@ -183,7 +171,7 @@ func (logicStub) Update(ctx context.Context, room *models.RoomInfo) error {
 }
 
 func (logicStub) List(ctx context.Context) ([]models.RoomInfo, error) {
-	list := []models.RoomInfo{{Id: "123", Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
+	list := []models.RoomInfo{{Id: stubId.String(), Name: "Belyash", Capacity: 5, Office: "BC Utopia", Stage: 20, Labels: []string{"video", "projector"}}}
 	return list, nil
 }
 

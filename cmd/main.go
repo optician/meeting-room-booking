@@ -21,14 +21,14 @@ func main() {
 	configurator := koanf.New(".")
 	parser := toml.Parser()
 
-	// os.Args because there is only one command line argument 
+	// os.Args because there is only one command line argument
 	var configPath string
 	if len(os.Args) < 2 {
 		logger.Fatal("not enough arguments: run 'main -- /cfg/path'")
 	} else {
 		configPath = os.Args[2]
 	}
-	
+
 	if err := configurator.Load(file.Provider(configPath), parser); err != nil {
 		logger.Fatalf("error loading config: %v", err)
 	}
@@ -38,7 +38,7 @@ func main() {
 		DecoderConfig: &mapstructure.DecoderConfig{
 			ErrorUnset:  true,
 			ErrorUnused: true,
-			Result: &config,
+			Result:      &config,
 		},
 	}
 	if err := configurator.UnmarshalWithConf("", &config, unmarshalConf); err != nil {
